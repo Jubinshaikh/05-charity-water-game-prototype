@@ -3,11 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Charity Water Game</title>
+    <title>Hydration Heroes</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the Charity Water Game Prototype</h1>
+    <main class="game-wrapper">
+        <!-- Game title and mission-inspired subtitle -->
+        <header class="game-header">
+            <h1>Hydration Heroes</h1>
+            <p class="subtitle">Help bring clean water to all</p>
+            <p class="controls-hint">Move with arrow keys, mouse, or touch.</p>
+        </header>
+
+        <!-- Live game information (updated with JavaScript) -->
+        <section class="game-stats" aria-label="Game stats">
+            <p id="scoreDisplay" class="stat-card stat-score">Score <span id="score">0</span></p>
+            <p id="timerDisplay" class="stat-card stat-timer">Time <span><span id="timeLeft">60</span>s</span></p>
+            <p id="livesDisplay" class="stat-card stat-lives">Lives <span id="lives">3</span></p>
+            <p id="goalDisplay" class="stat-card stat-goal">Goal <span id="targetScore">100</span></p>
+        </section>
+
+        <!-- Progress bar for reaching the target score -->
+        <section class="score-progress" aria-label="Score progress to goal">
+            <div class="progress-track">
+                <div id="scoreProgressFill" class="progress-fill"></div>
+            </div>
+            <p id="scoreProgressText">0% to goal</p>
+        </section>
+
+        <!-- Feedback message shown during gameplay -->
+        <p id="feedbackMessage" class="feedback-message" aria-live="polite">
+            Press Start to play!
+        </p>
+
+        <!-- Main play area where water and pollutant drops will fall -->
+        <section id="gameArea" class="game-area" aria-label="Hydration Heroes game area">
+            <!-- Player catcher near the bottom of the game area -->
+            <div id="playerCatcher" class="player-catcher" aria-label="Yellow jerry can catcher"></div>
+        </section>
+
+        <!-- Game control buttons -->
+        <section class="game-controls" aria-label="Game controls">
+            <button id="startButton" type="button">Start</button>
+            <button id="resetButton" type="button">Reset</button>
+        </section>
+    </main>
+
     <script src="script.js"></script>
 </body>
 </html>

@@ -13,3 +13,430 @@ Secondary Colors:
 - Pink:       #F16061
 
 */
+
+/* ------------------------------
+   1) Color variables and basics
+   ------------------------------ */
+:root {
+	--cw-yellow: #FFC907;
+	--cw-blue: #2E9DF7;
+	--cw-light-blue: #8BD1CB;
+	--cw-red: #F5402C;
+	--cw-orange: #FF902A;
+	--cw-dark-green: #159A48;
+	--ink: #1f2a37;
+	--soft-bg: #f6fbff;
+	--panel-bg: #ffffff;
+	--line: #d7e6f3;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+	color: var(--ink);
+	background: linear-gradient(180deg, #eef8ff 0%, var(--soft-bg) 55%, #ffffff 100%);
+}
+
+/* ---------------------------------
+   2) Main page layout and typography
+   --------------------------------- */
+.game-wrapper {
+	width: min(92vw, 760px);
+	margin: 1.5rem auto;
+	padding: 1.25rem;
+	background: var(--panel-bg);
+	border: 1px solid var(--line);
+	border-top: 6px solid var(--cw-yellow);
+	border-radius: 14px;
+	box-shadow: 0 12px 28px rgba(46, 157, 247, 0.1);
+}
+
+.game-header {
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.game-header h1 {
+	margin: 0;
+	font-size: 2rem;
+	color: var(--cw-blue);
+}
+
+.subtitle {
+	margin: 0.5rem 0 0;
+	font-size: 1rem;
+	color: #36536b;
+}
+
+.controls-hint {
+	margin: 0.45rem 0 0;
+	font-size: 0.9rem;
+	color: #4a6177;
+}
+
+/* ----------------------------------------
+   3) Scoreboard and feedback message styles
+   ---------------------------------------- */
+.game-stats {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(100px, 1fr));
+	gap: 0.65rem;
+	margin-bottom: 0.65rem;
+}
+
+.stat-card {
+	margin: 0;
+	padding: 0.62rem 0.7rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 0.5rem;
+	font-weight: 700;
+	background: #f4faff;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+}
+
+.stat-card span {
+	font-size: 1.15rem;
+	line-height: 1;
+	color: #163a59;
+}
+
+.stat-score {
+	border-color: rgba(21, 154, 72, 0.35);
+}
+
+.stat-timer {
+	border-color: rgba(46, 157, 247, 0.4);
+}
+
+.stat-lives {
+	border-color: rgba(245, 64, 44, 0.32);
+}
+
+.stat-goal {
+	border-color: rgba(255, 201, 7, 0.55);
+}
+
+/* Pulse timer card when time is low so the urgency is easy to see. */
+.stat-timer.timer-warning {
+	background: #fff1ec;
+	border-color: #ffb3a9;
+	animation: timerPulse 0.6s ease-in-out infinite alternate;
+}
+
+.score-progress {
+	margin: 0 0 0.9rem;
+}
+
+.progress-track {
+	height: 12px;
+	background: #e8f2fb;
+	border-radius: 999px;
+	border: 1px solid #d2e4f4;
+	overflow: hidden;
+}
+
+.progress-fill {
+	width: 0%;
+	height: 100%;
+	background: linear-gradient(90deg, var(--cw-yellow) 0%, var(--cw-orange) 45%, var(--cw-blue) 100%);
+	transition: width 0.25s ease;
+}
+
+#scoreProgressText {
+	margin: 0.45rem 0 0;
+	font-size: 0.88rem;
+	color: #3f5467;
+	text-align: right;
+}
+
+.feedback-message {
+	margin: 0 0 0.9rem;
+	padding: 0.65rem 0.8rem;
+	min-height: 2.6rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	background: #fff9e1;
+	border: 1px solid #ffe08a;
+	border-radius: 10px;
+	color: #6a4a00;
+	font-weight: 600;
+	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.feedback-message.feedback-info {
+	background: #fff9e1;
+	border-color: #ffe08a;
+	color: #6a4a00;
+}
+
+.feedback-message.feedback-success {
+	background: #ebfff0;
+	border-color: #9addaa;
+	color: #16613a;
+}
+
+.feedback-message.feedback-warning {
+	background: #fff3df;
+	border-color: #ffcc89;
+	color: #824400;
+}
+
+.feedback-message.feedback-danger {
+	background: #ffefec;
+	border-color: #f9b5ac;
+	color: #7f2e26;
+}
+
+/* Win message style used during celebration */
+.feedback-message.celebration-banner {
+	background: #e9ffef;
+	border-color: #90de9a;
+	color: #15613a;
+	animation: celebrationPulse 0.45s ease-in-out infinite alternate;
+}
+
+/* ---------------------------------
+   4) Game area and falling item look
+   --------------------------------- */
+.game-area {
+	position: relative;
+	width: 100%;
+	height: 420px;
+	background:
+		radial-gradient(circle at 15% 10%, rgba(139, 209, 203, 0.38), transparent 35%),
+		radial-gradient(circle at 85% 20%, rgba(46, 157, 247, 0.2), transparent 30%),
+		#fafdff;
+	border: 2px solid var(--cw-blue);
+	border-radius: 12px;
+	overflow: hidden;
+	touch-action: none;
+}
+
+/* Generic class for anything that falls from the top */
+.drop {
+	position: absolute;
+	top: -35px;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+}
+
+/* -------------------------
+   Win celebration (confetti)
+   ------------------------- */
+.celebration-layer {
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+	z-index: 6;
+}
+
+.confetti-piece {
+	position: absolute;
+	top: -20px;
+	width: 10px;
+	height: 14px;
+	border-radius: 2px;
+	opacity: 0.95;
+	animation-name: confettiFall;
+	animation-timing-function: linear;
+	animation-fill-mode: forwards;
+}
+
+@keyframes confettiFall {
+	0% {
+		transform: translateY(-20px) rotate(0deg);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateY(120%) rotate(540deg);
+		opacity: 0.2;
+	}
+}
+
+@keyframes celebrationPulse {
+	0% {
+		transform: scale(1);
+	}
+
+	100% {
+		transform: scale(1.02);
+	}
+}
+
+@keyframes timerPulse {
+	0% {
+		transform: scale(1);
+	}
+
+	100% {
+		transform: scale(1.015);
+	}
+}
+
+/* Clean water drop (blue) */
+.clean-drop {
+	background: radial-gradient(circle at 35% 35%, #c6ecff 0%, var(--cw-blue) 70%);
+	border: 1px solid #1f7ec7;
+}
+
+/* Pollutant drop (red/dark) */
+.pollutant-drop {
+	background: radial-gradient(circle at 35% 35%, #8b7f7f 0%, #2f2a2a 65%);
+	border: 1px solid var(--cw-red);
+	box-shadow: 0 0 0 2px rgba(245, 64, 44, 0.15);
+}
+
+/* ----------------------------
+   5) Player catcher (jerry can)
+   ---------------------------- */
+.player-catcher {
+	position: absolute;
+	bottom: 12px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 82px;
+	height: 44px;
+	border-radius: 8px;
+	background: linear-gradient(180deg, #ffe173 0%, var(--cw-yellow) 60%, #f5bd00 100%);
+	border: 2px solid #c49800;
+	box-shadow: 0 4px 0 rgba(148, 110, 0, 0.24);
+}
+
+/* Small handle on top so it feels like a can */
+.player-catcher::before {
+	content: "";
+	position: absolute;
+	top: -11px;
+	left: 12px;
+	width: 26px;
+	height: 11px;
+	border-radius: 6px 6px 0 0;
+	background: #ffda46;
+	border: 2px solid #c49800;
+	border-bottom: 0;
+}
+
+/* ---------------------
+   6) Button appearance
+   --------------------- */
+.game-controls {
+	margin-top: 1rem;
+	display: flex;
+	justify-content: center;
+	gap: 0.7rem;
+}
+
+.game-controls button {
+	border: 0;
+	border-radius: 10px;
+	padding: 0.65rem 1.15rem;
+	min-width: 110px;
+	font-weight: 700;
+	font-size: 0.98rem;
+	color: #ffffff;
+	cursor: pointer;
+	transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+#startButton {
+	background: var(--cw-dark-green);
+}
+
+#resetButton {
+	background: #5b6875;
+}
+
+.game-controls button:hover {
+	transform: translateY(-1px);
+	filter: brightness(1.06);
+}
+
+.game-controls button:active {
+	transform: translateY(0);
+}
+
+.game-controls button:focus-visible {
+	outline: 3px solid rgba(46, 157, 247, 0.35);
+	outline-offset: 2px;
+}
+
+/* --------------------------------
+   7) Responsive rules for tablets
+   -------------------------------- */
+@media (max-width: 768px) {
+	.game-wrapper {
+		width: 95vw;
+		padding: 1rem;
+		margin: 1rem auto;
+	}
+
+	.game-header h1 {
+		font-size: 1.7rem;
+	}
+
+	.game-stats {
+		grid-template-columns: repeat(2, minmax(120px, 1fr));
+	}
+
+	.game-area {
+		height: 360px;
+	}
+}
+
+/* --------------------------------
+   8) Responsive rules for phones
+   -------------------------------- */
+@media (max-width: 480px) {
+	.game-stats {
+		grid-template-columns: repeat(2, minmax(120px, 1fr));
+	}
+
+	.stat-card {
+		font-size: 0.95rem;
+		padding: 0.55rem 0.6rem;
+	}
+
+	.stat-card span {
+		font-size: 1.05rem;
+	}
+
+	#scoreProgressText {
+		font-size: 0.83rem;
+	}
+
+	.feedback-message {
+		font-size: 0.95rem;
+	}
+
+	.game-area {
+		height: 320px;
+	}
+
+	.player-catcher {
+		width: 72px;
+		height: 40px;
+	}
+
+	.game-controls {
+		gap: 0.55rem;
+	}
+
+	.game-controls button {
+		flex: 1;
+		min-width: 0;
+		padding: 0.62rem 0.8rem;
+		font-size: 0.93rem;
+	}
+}
