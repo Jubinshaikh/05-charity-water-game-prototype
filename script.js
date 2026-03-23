@@ -14,21 +14,70 @@ const playerCatcher = document.getElementById('playerCatcher');
 
 const startButton = document.getElementById('startButton');
 const resetButton = document.getElementById('resetButton');
+const difficultySelect = document.getElementById('difficultySelect');
+const difficultyInfo = document.getElementById('difficultyInfo');
+
+// -------------------------------------------
+// 1.5) Difficulty modes object with all settings
+// -------------------------------------------
+// Each mode defines the complete gameplay parameters so students
+// can experience 3 distinct difficulty levels with clear differences.
+const gameModes = {
+	easy: {
+		timer: 75,
+		lives: 4,
+		targetScore: 80,
+		baseSpawnDelay: 950,
+		basePollutantChance: 0.22,
+		cleanReward: 10,
+		pollutantPenalty: 4,
+		missPenalty: 1,
+		cleanMissesForLifePenalty: 5,
+		displayName: 'Easy'
+	},
+	normal: {
+		timer: 60,
+		lives: 3,
+		targetScore: 100,
+		baseSpawnDelay: 850,
+		basePollutantChance: 0.30,
+		cleanReward: 10,
+		pollutantPenalty: 5,
+		missPenalty: 2,
+		cleanMissesForLifePenalty: 4,
+		displayName: 'Normal'
+	},
+	hard: {
+		timer: 45,
+		lives: 2,
+		targetScore: 120,
+		baseSpawnDelay: 700,
+		basePollutantChance: 0.42,
+		cleanReward: 10,
+		pollutantPenalty: 6,
+		missPenalty: 2,
+		cleanMissesForLifePenalty: 3,
+		displayName: 'Hard'
+	}
+};
 
 // ---------------------------
 // 2) Game state variables
 // ---------------------------
 // These are the main values that change while playing.
 const initialScoreValue = 0;
-const initialTimerValue = 60;
-const initialLivesValue = 3;
+let currentDifficulty = 'normal';
+let currentMode = gameModes.normal;
+let initialTimerValue = currentMode.timer;
+let initialLivesValue = currentMode.lives;
+let targetScore = currentMode.targetScore;
 const resetMessageText = 'Game reset! Press Start to play again.';
 
 let score = initialScoreValue;
 let timer = initialTimerValue;
 let lives = initialLivesValue;
 let gameRunning = false;
-const targetScore = 100;
+let lastMilestoneAnnounced = 0;  // Track announced milestones to avoid duplicates.
 
 // We store the interval ID so we can stop the timer later.
 let timerIntervalId = null;
@@ -40,13 +89,14 @@ let feedbackLockUntil = 0;
 // -------------------------------
 // CHALLENGE LOGIC (fair + simple)
 // -------------------------------
-// These values make pollutants feel like obstacles, add a penalty for
+// These values come from the selected difficulty mode.
+// They make pollutants feel like obstacles, add a penalty for
 // missing many clean drops, and increase difficulty a little over time.
-const pollutantScorePenalty = 5;
-const cleanMissesForLifePenalty = 4;
+let pollutantScorePenalty = currentMode.pollutantPenalty;
+let cleanMissesForLifePenalty = currentMode.cleanMissesForLifePenalty;
 let missedCleanStreak = 0;
-let currentSpawnDelay = 900;
-let pollutantChance = 0.3;
+let currentSpawnDelay = currentMode.baseSpawnDelay;
+let pollutantChance = currentMode.basePollutantChance;
 const confettiColors = ['#FFC907', '#2E9DF7', '#8BD1CB', '#4FCB53', '#FF902A', '#F16061'];
 
 // Array to track every falling item currently on screen.
@@ -69,6 +119,47 @@ const feedbackClassNames = ['feedback-info', 'feedback-success', 'feedback-warni
 function clampCatcherX(value) {
 	const maxX = Math.max(0, gameArea.clientWidth - playerCatcher.offsetWidth);
 	return Math.min(Math.max(value, 0), maxX);
+}
+
+// ---------------------------------------------------------------------------
+// 4.5) applyDifficultyMode(): load settings from the selected game mode
+// ---------------------------------------------------------------------------
+// This function updates all game settings to match the selected difficulty.
+// Can only be called when the game is not running.
+function applyDifficultyMode(modeKey) {
+	if (gameRunning) {
+		// Difficulty locked during gameplay - revert selector to current mode.
+		difficultySelect.value = currentDifficulty;
+		setFeedbackMessage('Cannot change difficulty while playing!', 'warning', 800);
+		return;
+	}
+
+	currentDifficulty = modeKey;
+	currentMode = gameModes[modeKey];
+
+	// Update all mode-dependent constants.
+	initialTimerValue = currentMode.timer;
+	initialLivesValue = currentMode.lives;
+	targetScore = currentMode.targetScore;
+	pollutantScorePenalty = currentMode.pollutantPenalty;
+	cleanMissesForLifePenalty = currentMode.cleanMissesForLifePenalty;
+	currentSpawnDelay = currentMode.baseSpawnDelay;
+	pollutantChance = currentMode.basePollutantChance;
+
+	// Reset game values to mode defaults.
+	score = initialScoreValue;
+	timer = initialTimerValue;
+	lives = initialLivesValue;
+	missedCleanStreak = 0;
+	lastMilestoneAnnounced = 0;
+	leftKeyDown = false;
+	rightKeyDown = false;
+
+	// Update display and difficulty info.
+	difficultyInfo.innerHTML = `Currently playing: <strong>${currentMode.displayName}</strong>`;
+	targetScoreElement.textContent = targetScore;
+	setFeedbackMessage(`Difficulty changed to ${currentMode.displayName}. Press Start to play!`, 'info');
+	updateDisplay();
 }
 
 // -----------------------------------------------------
@@ -134,6 +225,47 @@ function setFeedbackMessage(message, tone = 'info', lockMs = 0) {
 
 	if (lockMs > 0) {
 		feedbackLockUntil = Date.now() + lockMs;
+	}
+}
+
+// -----------------------------------------------------------------------
+// 10.5) createFloatingFeedback(): create floating text in game area
+// -----------------------------------------------------------------------
+// Creates a temporary floating feedback message at the event location.
+// The message floats upward and fades out, then removes itself from the DOM.
+function createFloatingFeedback(text, x, y, type = 'info') {
+	const floatingElement = document.createElement('div');
+	floatingElement.classList.add('floating-feedback');
+	floatingElement.classList.add(`floating-${type}`);
+	floatingElement.textContent = text;
+
+	// Position it near the catch/miss event.
+	floatingElement.style.left = `${x}px`;
+	floatingElement.style.top = `${y}px`;
+
+	gameArea.appendChild(floatingElement);
+
+	// Remove the element after the animation completes (1 second).
+	setTimeout(() => {
+		floatingElement.remove();
+	}, 1000);
+}
+
+// -----------------------------------------------------------------------
+// 10.6) checkScoreMilestone(): show floating feedback for score achievements
+// -----------------------------------------------------------------------
+// Announces when the player reaches score milestones (25, 50, 75, etc.).
+function checkScoreMilestone() {
+	// Milestones every 25 points.
+	const milestoneInterval = 25;
+	const currentMilestone = Math.floor(score / milestoneInterval) * milestoneInterval;
+
+	if (currentMilestone > lastMilestoneAnnounced && currentMilestone > 0) {
+		lastMilestoneAnnounced = currentMilestone;
+		// Show milestone feedback near the center-top of the game area.
+		const centerX = gameArea.clientWidth / 2 - 25;
+		const topY = gameArea.clientHeight / 3;
+		createFloatingFeedback(`${currentMilestone}!`, centerX, topY, 'milestone');
 	}
 }
 
@@ -212,19 +344,19 @@ function startSpawnLoop() {
 // ----------------------------------------------------------------
 function updateChallengeDifficulty() {
 	const elapsedTime = initialTimerValue - timer;
-	let newSpawnDelay = 900;
-	let newPollutantChance = 0.3;
+	let newSpawnDelay = currentMode.baseSpawnDelay;
+	let newPollutantChance = currentMode.basePollutantChance;
 
 	// Level 2: a little faster and a few more pollutants.
-	if (elapsedTime >= 20) {
-		newSpawnDelay = 820;
-		newPollutantChance = 0.33;
+	if (elapsedTime >= Math.floor(initialTimerValue * 0.33)) {
+		newSpawnDelay = Math.floor(currentMode.baseSpawnDelay * 0.92);
+		newPollutantChance = currentMode.basePollutantChance + 0.04;
 	}
 
 	// Level 3: slightly faster again, but still fair for students.
-	if (elapsedTime >= 40) {
-		newSpawnDelay = 760;
-		newPollutantChance = 0.36;
+	if (elapsedTime >= Math.floor(initialTimerValue * 0.67)) {
+		newSpawnDelay = Math.floor(currentMode.baseSpawnDelay * 0.85);
+		newPollutantChance = currentMode.basePollutantChance + 0.08;
 	}
 
 	pollutantChance = newPollutantChance;
@@ -289,16 +421,28 @@ function handleItemCollision(item) {
 		return;
 	}
 
+	// Get the position of the caught item for floating feedback.
+	const itemRect = item.element.getBoundingClientRect();
+	const gameAreaRect = gameArea.getBoundingClientRect();
+	const floatingX = itemRect.left - gameAreaRect.left;
+	const floatingY = itemRect.top - gameAreaRect.top;
+
 	if (item.type === 'clean') {
-		score += 10;
+		score += currentMode.cleanReward;
 		missedCleanStreak = 0;
 		setFeedbackMessage('Great catch!', 'success', 850);
+		// Show floating feedback for caught clean water.
+		createFloatingFeedback(`+${currentMode.cleanReward}`, floatingX, floatingY, 'success');
+		// Check if this catch reached a score milestone.
+		checkScoreMilestone();
 	} else {
 		// CHALLENGE LOGIC:
 		// Pollutants are obstacles. Catching one hurts score and lives.
 		score = Math.max(0, score - pollutantScorePenalty);
 		lives -= 1;
-		setFeedbackMessage('Watch out for pollutants! -5 score and -1 life.', 'danger', 1100);
+		setFeedbackMessage(`Watch out for pollutants! -${pollutantScorePenalty} score and -1 life.`, 'danger', 1100);
+		// Show floating feedback for caught pollutant.
+		createFloatingFeedback(`-${pollutantScorePenalty}`, floatingX, floatingY, 'danger');
 	}
 
 	updateDisplay();
@@ -315,7 +459,16 @@ function handleMissedItem(item) {
 
 	// Small penalty only when a clean drop is missed.
 	if (item.type === 'clean') {
-		score = Math.max(0, score - 2);
+		score = Math.max(0, score - currentMode.missPenalty);
+
+		// Get position of the missed drop for floating feedback.
+		const itemRect = item.element.getBoundingClientRect();
+		const gameAreaRect = gameArea.getBoundingClientRect();
+		const floatingX = itemRect.left - gameAreaRect.left;
+		const floatingY = itemRect.top - gameAreaRect.top;
+
+		// Show floating feedback for missed drop.
+		createFloatingFeedback('Miss!', floatingX, floatingY, 'warning');
 
 		// CHALLENGE LOGIC:
 		// Missing too many clean drops in a row costs one life.
@@ -501,8 +654,9 @@ function startGame() {
 
 	// Reset challenge values each time a new game starts.
 	missedCleanStreak = 0;
-	currentSpawnDelay = 900;
-	pollutantChance = 0.3;
+	lastMilestoneAnnounced = 0;
+	currentSpawnDelay = currentMode.baseSpawnDelay;
+	pollutantChance = currentMode.basePollutantChance;
 	feedbackLockUntil = 0;
 
 	// Spawn loop starts at a fair speed and can get slightly faster over time.
@@ -537,8 +691,9 @@ function resetGame() {
 	timer = initialTimerValue;
 	lives = initialLivesValue;
 	missedCleanStreak = 0;
-	currentSpawnDelay = 900;
-	pollutantChance = 0.3;
+	lastMilestoneAnnounced = 0;
+	currentSpawnDelay = currentMode.baseSpawnDelay;
+	pollutantChance = currentMode.basePollutantChance;
 	feedbackLockUntil = 0;
 	leftKeyDown = false;
 	rightKeyDown = false;
@@ -653,6 +808,14 @@ window.addEventListener('resize', () => {
 // -----------------------------------
 startButton.addEventListener('click', startGame);
 resetButton.addEventListener('click', resetGame);
+
+// -----------------------------------------------
+// 31.5) Difficulty selector: change game mode
+// -----------------------------------------------
+// Players can only change difficulty when the game is not running.
+difficultySelect.addEventListener('change', (event) => {
+	applyDifficultyMode(event.target.value);
+});
 
 // Set the starting values on page load.
 targetScoreElement.textContent = targetScore;

@@ -14,6 +14,9 @@ Secondary Colors:
 
 */
 
+/* Import Montserrat Google Font for modern branding */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap');
+
 /* ------------------------------
    1) Color variables and basics
    ------------------------------ */
@@ -36,7 +39,8 @@ Secondary Colors:
 
 body {
 	margin: 0;
-	font-family: "Trebuchet MS", "Gill Sans", "Segoe UI", sans-serif;
+	font-family: 'Montserrat', "Segoe UI", sans-serif;
+	font-weight: 400;
 	color: var(--ink);
 	background: linear-gradient(180deg, #eef8ff 0%, var(--soft-bg) 55%, #ffffff 100%);
 }
@@ -62,20 +66,25 @@ body {
 
 .game-header h1 {
 	margin: 0;
-	font-size: 2rem;
+	font-size: 2.2rem;
+	font-weight: 800;
+	letter-spacing: -0.5px;
 	color: var(--cw-blue);
 }
 
 .subtitle {
 	margin: 0.5rem 0 0;
 	font-size: 1rem;
-	color: #36536b;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+	color: #2a4a62;
 }
 
 .controls-hint {
 	margin: 0.45rem 0 0;
 	font-size: 0.9rem;
-	color: #4a6177;
+	font-weight: 500;
+	color: #5a7089;
 }
 
 /* ----------------------------------------
@@ -96,14 +105,17 @@ body {
 	align-items: center;
 	gap: 0.5rem;
 	font-weight: 700;
+	font-size: 0.95rem;
+	letter-spacing: 0.2px;
 	background: #f4faff;
 	border: 1px solid var(--line);
 	border-radius: 10px;
 }
 
 .stat-card span {
-	font-size: 1.15rem;
+	font-size: 1.25rem;
 	line-height: 1;
+	font-weight: 700;
 	color: #163a59;
 }
 
@@ -152,6 +164,8 @@ body {
 #scoreProgressText {
 	margin: 0.45rem 0 0;
 	font-size: 0.88rem;
+	font-weight: 500;
+	letter-spacing: 0.2px;
 	color: #3f5467;
 	text-align: right;
 }
@@ -169,6 +183,8 @@ body {
 	border-radius: 10px;
 	color: #6a4a00;
 	font-weight: 600;
+	font-size: 0.95rem;
+	letter-spacing: 0.3px;
 	transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
@@ -298,6 +314,58 @@ body {
 	box-shadow: 0 0 0 2px rgba(245, 64, 44, 0.15);
 }
 
+/* -----------------------------------------------
+   Floating feedback for game events (catches, misses)
+   ----------------------------------------------- */
+.floating-feedback {
+	position: absolute;
+	pointer-events: none;
+	font-weight: 700;
+	font-size: 1.1rem;
+	z-index: 5;
+	animation-name: floatUpAndFade;
+	animation-duration: 1s;
+	animation-timing-function: ease-out;
+	animation-fill-mode: forwards;
+}
+
+/* Green feedback for caught clean drops */
+.floating-feedback.floating-success {
+	color: var(--cw-dark-green);
+	text-shadow: 0 0 4px rgba(21, 154, 72, 0.4);
+}
+
+/* Red feedback for caught pollutants or life loss */
+.floating-feedback.floating-danger {
+	color: var(--cw-red);
+	text-shadow: 0 0 4px rgba(245, 64, 44, 0.4);
+}
+
+/* Orange feedback for missed drops */
+.floating-feedback.floating-warning {
+	color: var(--cw-orange);
+	text-shadow: 0 0 4px rgba(255, 144, 42, 0.4);
+}
+
+/* Gold feedback for milestone achievements */
+.floating-feedback.floating-milestone {
+	color: var(--cw-yellow);
+	text-shadow: 0 0 4px rgba(255, 201, 7, 0.5);
+	font-size: 1.25rem;
+}
+
+@keyframes floatUpAndFade {
+	0% {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+
+	100% {
+		transform: translateY(-50px) scale(0.85);
+		opacity: 0;
+	}
+}
+
 /* ----------------------------
    5) Player catcher (jerry can)
    ---------------------------- */
@@ -345,6 +413,7 @@ body {
 	min-width: 110px;
 	font-weight: 700;
 	font-size: 0.98rem;
+	letter-spacing: 0.3px;
 	color: #ffffff;
 	cursor: pointer;
 	transition: transform 0.15s ease, filter 0.15s ease;
@@ -372,8 +441,140 @@ body {
 	outline-offset: 2px;
 }
 
+/* ----------------------------------------------
+   7) Difficulty selector styles
+   ---------------------------------------------- */
+.difficulty-selector {
+	margin: 1rem 0;
+	padding: 0.8rem;
+	background: #f0f8ff;
+	border: 1px solid var(--line);
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	gap: 0.8rem;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.difficulty-selector label {
+	font-weight: 700;
+	font-size: 0.95rem;
+	letter-spacing: 0.3px;
+	color: var(--ink);
+}
+
+.difficulty-selector select {
+	padding: 0.5rem 0.8rem;
+	border: 2px solid var(--cw-blue);
+	border-radius: 6px;
+	background: #ffffff;
+	font-family: 'Montserrat', "Segoe UI", sans-serif;
+	font-weight: 600;
+	font-size: 0.95rem;
+	color: var(--ink);
+	cursor: pointer;
+	transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.difficulty-selector select:hover {
+	border-color: var(--cw-yellow);
+}
+
+.difficulty-selector select:focus-visible {
+	outline: none;
+	border-color: var(--cw-yellow);
+	box-shadow: 0 0 0 3px rgba(255, 201, 7, 0.2);
+}
+
+.difficulty-info {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 500;
+	letter-spacing: 0.2px;
+	color: #3f5467;
+	white-space: nowrap;
+}
+
 /* --------------------------------
-   7) Responsive rules for tablets
+   7.5) Footer styles
+   -------------------------------- */
+.game-footer {
+	margin: 2rem auto 1.5rem;
+	padding: 1.8rem;
+	width: min(92vw, 760px);
+	background: var(--panel-bg);
+	border: 1px solid var(--line);
+	border-top: 4px solid var(--cw-yellow);
+	border-radius: 14px;
+	box-shadow: 0 8px 24px rgba(46, 157, 247, 0.08);
+}
+
+.footer-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	gap: 1rem;
+}
+
+.footer-logo {
+	max-width: 180px;
+	height: auto;
+	opacity: 0.9;
+	transition: opacity 0.3s ease;
+}
+
+.footer-logo:hover {
+	opacity: 1;
+}
+
+.footer-mission {
+	margin: 0;
+	font-size: 0.95rem;
+	font-weight: 500;
+	letter-spacing: 0.2px;
+	color: #4a6177;
+	line-height: 1.6;
+	max-width: 400px;
+}
+
+.footer-links {
+	display: flex;
+	gap: 1.2rem;
+	justify-content: center;
+	flex-wrap: wrap;
+	margin: 0.5rem 0 0;
+}
+
+.footer-links a {
+	padding: 0.6rem 1rem;
+	background: var(--cw-blue);
+	color: #ffffff;
+	text-decoration: none;
+	font-weight: 600;
+	font-size: 0.95rem;
+	letter-spacing: 0.3px;
+	border-radius: 8px;
+	transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+.footer-links a:hover {
+	background-color: var(--cw-dark-green);
+	transform: translateY(-2px);
+}
+
+.footer-links a:active {
+	transform: translateY(0);
+}
+
+.footer-links a:focus-visible {
+	outline: 3px solid rgba(46, 157, 247, 0.35);
+	outline-offset: 2px;
+}
+
+/* --------------------------------
+   8) Responsive rules for tablets
    -------------------------------- */
 @media (max-width: 768px) {
 	.game-wrapper {
@@ -393,10 +594,29 @@ body {
 	.game-area {
 		height: 360px;
 	}
+
+	.game-footer {
+		width: 95vw;
+		padding: 1.5rem;
+		margin: 1.5rem auto 1rem;
+	}
+
+	.footer-logo {
+		max-width: 160px;
+	}
+
+	.footer-mission {
+		font-size: 0.9rem;
+	}
+
+	.footer-links a {
+		font-size: 0.9rem;
+		padding: 0.55rem 0.9rem;
+	}
 }
 
 /* --------------------------------
-   8) Responsive rules for phones
+   9) Responsive rules for phones
    -------------------------------- */
 @media (max-width: 480px) {
 	.game-stats {
@@ -438,5 +658,27 @@ body {
 		min-width: 0;
 		padding: 0.62rem 0.8rem;
 		font-size: 0.93rem;
+	}
+
+	.game-footer {
+		padding: 1.2rem;
+		margin: 1.2rem auto 0.8rem;
+	}
+
+	.footer-logo {
+		max-width: 140px;
+	}
+
+	.footer-mission {
+		font-size: 0.85rem;
+	}
+
+	.footer-links {
+		gap: 0.8rem;
+	}
+
+	.footer-links a {
+		font-size: 0.85rem;
+		padding: 0.5rem 0.8rem;
 	}
 }

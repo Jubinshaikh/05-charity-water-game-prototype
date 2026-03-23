@@ -42,12 +42,35 @@
             <div id="playerCatcher" class="player-catcher" aria-label="Yellow jerry can catcher"></div>
         </section>
 
+        <!-- Difficulty mode selector -->
+        <section class="difficulty-selector" aria-label="Game difficulty selection">
+            <label for="difficultySelect">Difficulty Level:</label>
+            <select id="difficultySelect" aria-label="Choose game difficulty">
+                <option value="easy">Easy</option>
+                <option value="normal" selected>Normal</option>
+                <option value="hard">Hard</option>
+            </select>
+            <p id="difficultyInfo" class="difficulty-info">Currently playing: <strong>Normal</strong></p>
+        </section>
+
         <!-- Game control buttons -->
         <section class="game-controls" aria-label="Game controls">
             <button id="startButton" type="button">Start</button>
             <button id="resetButton" type="button">Reset</button>
         </section>
     </main>
+
+    <!-- Footer with mission and links -->
+    <footer class="game-footer" aria-label="Learn more about charity: water">
+        <div class="footer-content">
+            <img src="img/cw_logo_horizontal.png" alt="charity: water logo" class="footer-logo">
+            <p class="footer-mission">Learn how small actions can support access to clean water.</p>
+            <nav class="footer-links" aria-label="charity: water resources">
+                <a href="https://www.charitywater.org/" target="_blank" rel="noopener noreferrer">Learn More</a>
+                <a href="https://www.charitywater.org/donate" target="_blank" rel="noopener noreferrer">Donate</a>
+            </nav>
+        </div>
+    </footer>
 
     <script src="script.js"></script>
 </body>
