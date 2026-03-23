@@ -87,6 +87,14 @@ body {
 	color: #5a7089;
 }
 
+.mode-hint {
+	margin: 0.35rem 0 0;
+	font-size: 0.84rem;
+	font-weight: 600;
+	letter-spacing: 0.2px;
+	color: #446179;
+}
+
 /* ----------------------------------------
    3) Scoreboard and feedback message styles
    ---------------------------------------- */
@@ -354,6 +362,37 @@ body {
 	font-size: 1.25rem;
 }
 
+/* Temporary banner for percentage milestones */
+.milestone-banner {
+	position: absolute;
+	top: 16px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 0.45rem 0.75rem;
+	border-radius: 999px;
+	background: rgba(255, 201, 7, 0.95);
+	border: 1px solid #c49800;
+	color: #5a3d00;
+	font-weight: 700;
+	font-size: 0.88rem;
+	letter-spacing: 0.2px;
+	z-index: 7;
+	pointer-events: none;
+	animation: milestoneBannerPop 0.2s ease-out;
+}
+
+@keyframes milestoneBannerPop {
+	0% {
+		opacity: 0;
+		transform: translateX(-50%) translateY(-8px);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+	}
+}
+
 @keyframes floatUpAndFade {
 	0% {
 		transform: translateY(0) scale(1);
@@ -427,6 +466,17 @@ body {
 	background: #5b6875;
 }
 
+#soundToggleButton {
+	min-width: 96px;
+	padding: 0.55rem 0.8rem;
+	font-size: 0.85rem;
+	background: #2a4a62;
+}
+
+#soundToggleButton.sound-on {
+	background: #1f6f43;
+}
+
 .game-controls button:hover {
 	transform: translateY(-1px);
 	filter: brightness(1.06);
@@ -437,7 +487,7 @@ body {
 }
 
 .game-controls button:focus-visible {
-	outline: 3px solid rgba(46, 157, 247, 0.35);
+	outline: 3px solid rgba(46, 157, 247, 0.7);
 	outline-offset: 2px;
 }
 
@@ -455,6 +505,25 @@ body {
 	gap: 0.8rem;
 	flex-wrap: wrap;
 	justify-content: center;
+}
+
+.difficulty-selector:focus-within {
+	box-shadow: 0 0 0 3px rgba(46, 157, 247, 0.18);
+}
+
+.difficulty-selector[data-mode="easy"] {
+	background: #edfcef;
+	border-color: rgba(79, 203, 83, 0.45);
+}
+
+.difficulty-selector[data-mode="normal"] {
+	background: #eef7ff;
+	border-color: rgba(46, 157, 247, 0.45);
+}
+
+.difficulty-selector[data-mode="hard"] {
+	background: #fff2ef;
+	border-color: rgba(245, 64, 44, 0.35);
 }
 
 .difficulty-selector label {
@@ -489,11 +558,30 @@ body {
 
 .difficulty-info {
 	margin: 0;
+	padding: 0.32rem 0.6rem;
+	border-radius: 999px;
+	background: #ffffff;
+	border: 1px solid var(--line);
 	font-size: 0.95rem;
 	font-weight: 500;
 	letter-spacing: 0.2px;
 	color: #3f5467;
 	white-space: nowrap;
+}
+
+.difficulty-selector[data-mode="easy"] .difficulty-info {
+	border-color: rgba(79, 203, 83, 0.45);
+	color: #1f6f43;
+}
+
+.difficulty-selector[data-mode="normal"] .difficulty-info {
+	border-color: rgba(46, 157, 247, 0.45);
+	color: #1b598b;
+}
+
+.difficulty-selector[data-mode="hard"] .difficulty-info {
+	border-color: rgba(245, 64, 44, 0.35);
+	color: #9b2b1d;
 }
 
 /* --------------------------------
@@ -569,7 +657,7 @@ body {
 }
 
 .footer-links a:focus-visible {
-	outline: 3px solid rgba(46, 157, 247, 0.35);
+	outline: 3px solid rgba(46, 157, 247, 0.7);
 	outline-offset: 2px;
 }
 
